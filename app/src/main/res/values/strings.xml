@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">simpleChat</string>
+    <string name="getButton">GET</string>
+    <string name="postButton">POST</string>
+</resources>
