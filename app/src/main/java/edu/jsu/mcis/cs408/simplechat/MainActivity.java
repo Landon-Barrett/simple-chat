@@ -41,7 +41,7 @@ public class MainActivity extends AppCompatActivity implements AbstractView {
 
         model.initDefault();
 
-        binding.getButton.setOnClickListener(new View.OnClickListener() {
+        binding.clearButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 controller.sendGetRequest();
