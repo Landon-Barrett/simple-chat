@@ -1,10 +1,8 @@
 package edu.jsu.mcis.cs408.simplechat;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 
 import org.json.JSONException;
@@ -17,12 +15,11 @@ import edu.jsu.mcis.cs408.simplechat.databinding.ActivityMainBinding;
 
 public class MainActivity extends AppCompatActivity implements AbstractView {
 
-    public static final String TAG = "MainActivity";
     private static final String NAME = "John Smith";
 
     private ActivityMainBinding binding;
 
-    private DefaultController controller;
+    private SimpleChatController controller;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,17 +29,11 @@ public class MainActivity extends AppCompatActivity implements AbstractView {
         View view = binding.getRoot();
         setContentView(view);
 
-        /* Create Controller and Models */
-
-        controller = new DefaultController();
-        ExampleWebServiceModel model = new ExampleWebServiceModel();
-
-        /* Register Activity View and Model with Controller */
+        controller = new SimpleChatController();
+        SimpleChatModel model = new SimpleChatModel();
 
         controller.addView(this);
         controller.addModel(model);
-
-        /* Initialize Model to Default Values */
 
         model.initDefault();
 
@@ -58,6 +49,7 @@ public class MainActivity extends AppCompatActivity implements AbstractView {
             public void onClick(View view) {
 
                 String input = binding.input.getText().toString();
+
                 JSONObject jsonObject = new JSONObject();
                 try {
 
@@ -79,9 +71,7 @@ public class MainActivity extends AppCompatActivity implements AbstractView {
         String propertyName = evt.getPropertyName();
         String propertyValue = evt.getNewValue().toString();
 
-        Log.i(TAG, "New " + propertyName + " Value from Model: " + propertyValue);
-
-        if ( propertyName.equals(DefaultController.ELEMENT_OUTPUT_PROPERTY) ) {
+        if ( propertyName.equals(SimpleChatController.ELEMENT_OUTPUT_PROPERTY) ) {
 
             String oldPropertyValue = binding.output.getText().toString();
 

@@ -18,7 +18,7 @@ import java.util.concurrent.Future;
 
 import javax.net.ssl.HttpsURLConnection;
 
-public class ExampleWebServiceModel extends AbstractModel {
+public class SimpleChatModel extends AbstractModel {
 
     private static final String TAG = "ExampleWebServiceModel";
 
@@ -29,13 +29,12 @@ public class ExampleWebServiceModel extends AbstractModel {
     private String json;
 
     private String outputText;
-    private DefaultController controller;
 
     private final ExecutorService requestThreadExecutor;
     private final Runnable httpGetRequestThread, httpPostRequestThread, httpDeleteRequestThread;
     private Future<?> pending;
 
-    public ExampleWebServiceModel() {
+    public SimpleChatModel() {
 
         requestThreadExecutor = Executors.newSingleThreadExecutor();
 
@@ -44,11 +43,9 @@ public class ExampleWebServiceModel extends AbstractModel {
             @Override
             public void run() {
 
-                /* If a previous request is still pending, cancel it */
 
                 if (pending != null) { pending.cancel(true); }
 
-                /* Begin new request now, but don't wait for it */
 
                 try {
                     pending = requestThreadExecutor.submit(new HTTPRequestTask("GET", GET_URL));
@@ -64,11 +61,9 @@ public class ExampleWebServiceModel extends AbstractModel {
             @Override
             public void run() {
 
-                /* If a previous request is still pending, cancel it */
 
                 if (pending != null) { pending.cancel(true); }
 
-                /* Begin new request now, but don't wait for it */
 
                 try {
                     pending = requestThreadExecutor.submit(new HTTPRequestTask("POST", POST_URL));
@@ -84,11 +79,7 @@ public class ExampleWebServiceModel extends AbstractModel {
             @Override
             public void run() {
 
-                /* If a previous request is still pending, cancel it */
-
                 if (pending != null) { pending.cancel(true); }
-
-                /* Begin new request now, but don't wait for it */
 
                 try {
                     pending = requestThreadExecutor.submit(new HTTPRequestTask("DELETE", POST_URL));
@@ -102,10 +93,7 @@ public class ExampleWebServiceModel extends AbstractModel {
     }
 
     public void initDefault() {
-
-        //setOutputText("Click the button to send an HTTP GET request ...");
         sendGetRequest();
-
     }
 
     public String getOutputText() {
@@ -117,13 +105,9 @@ public class ExampleWebServiceModel extends AbstractModel {
         String oldText = this.outputText;
         this.outputText = newText;
 
-        Log.i(TAG, "Output Text Change: From " + oldText + " to " + newText);
-
-        firePropertyChange(DefaultController.ELEMENT_OUTPUT_PROPERTY, oldText, newText);
+        firePropertyChange(SimpleChatController.ELEMENT_OUTPUT_PROPERTY, oldText, newText);
 
     }
-
-    // Start GET Request (called from Controller)
 
     public void sendGetRequest() {
         httpGetRequestThread.run();
@@ -131,14 +115,10 @@ public class ExampleWebServiceModel extends AbstractModel {
 
     public void sendDeleteRequest() {httpDeleteRequestThread.run();}
 
-    // Start POST Request (called from Controller)
-
     public void sendPostRequest(String jsonString) {
         json = jsonString;
         httpPostRequestThread.run();
     }
-
-    // Setter / Getter Methods for JSON LiveData
 
     private void setJsonData(JSONObject json) {
 
@@ -159,8 +139,6 @@ public class ExampleWebServiceModel extends AbstractModel {
         return jsonData;
     }
 
-    // Private Class for HTTP Request Threads
-
     private class HTTPRequestTask implements Runnable {
 
         private static final String TAG = "HTTPRequestTask";
@@ -177,8 +155,6 @@ public class ExampleWebServiceModel extends AbstractModel {
             setJsonData(results);
         }
 
-        /* Create and Send Request */
-
         private JSONObject doRequest(String urlString) {
 
             StringBuilder r = new StringBuilder();
@@ -187,16 +163,10 @@ public class ExampleWebServiceModel extends AbstractModel {
             HttpURLConnection conn = null;
             JSONObject results = null;
 
-            /* Log Request Data */
-
             try {
-
-                /* Check if task has been interrupted */
 
                 if (Thread.interrupted())
                     throw new InterruptedException();
-
-                /* Create Request */
 
                 URL url = new URL(urlString);
 
@@ -208,17 +178,9 @@ public class ExampleWebServiceModel extends AbstractModel {
                 conn.setRequestMethod(method);
                 conn.setDoInput(true);
 
-                /* Add Request Parameters (if any) */
-
                 if (method.equals("POST") ) {
 
                     conn.setDoOutput(true);
-
-                    // Create request parameters (these will be echoed back by the example API)
-
-                    String p = "name=Jack+Flack&userid=2001";
-
-                    // Write parameters to request body
 
                     OutputStream out = conn.getOutputStream();
                     out.write(json.getBytes());
@@ -230,24 +192,16 @@ public class ExampleWebServiceModel extends AbstractModel {
                     conn.setRequestMethod("DELETE");
                 }
 
-                /* Send Request */
-
                 conn.connect();
-
-                /* Check if task has been interrupted */
 
                 if (Thread.interrupted())
                     throw new InterruptedException();
-
-                /* Get Reader for Results */
 
                 int code = conn.getResponseCode();
 
                 if (code == HttpsURLConnection.HTTP_OK || code == HttpsURLConnection.HTTP_CREATED) {
 
                     BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-
-                    /* Read Response Into StringBuilder */
 
                     do {
                         line = reader.readLine();
@@ -258,12 +212,8 @@ public class ExampleWebServiceModel extends AbstractModel {
 
                 }
 
-                /* Check if task has been interrupted */
-
                 if (Thread.interrupted())
                     throw new InterruptedException();
-
-                /* Parse Response as JSON */
 
                 results = new JSONObject(r.toString());
 
@@ -274,10 +224,6 @@ public class ExampleWebServiceModel extends AbstractModel {
             finally {
                 if (conn != null) { conn.disconnect(); }
             }
-
-            /* Finished; Log and Return Results */
-
-            Log.d(TAG, " JSON: " + r.toString());
 
             return results;
 
