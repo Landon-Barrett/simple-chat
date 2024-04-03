@@ -4,6 +4,7 @@ import android.util.Log;
 
 import androidx.lifecycle.MutableLiveData;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -21,12 +22,14 @@ public class ExampleWebServiceModel extends AbstractModel {
 
     private static final String TAG = "ExampleWebServiceModel";
 
-    private static final String GET_URL = "https://jsonplaceholder.typicode.com/todos/1";
-    private static final String POST_URL = "https://jsonplaceholder.typicode.com/posts";
+    private static final String GET_URL = "https://testbed.jaysnellen.com:8443/SimpleChat/board";
+    private static final String POST_URL = "https://testbed.jaysnellen.com:8443/SimpleChat/board";
 
     private MutableLiveData<JSONObject> jsonData;
+    private String json;
 
     private String outputText;
+    private DefaultController controller;
 
     private final ExecutorService requestThreadExecutor;
     private final Runnable httpGetRequestThread, httpPostRequestThread;
@@ -80,7 +83,8 @@ public class ExampleWebServiceModel extends AbstractModel {
 
     public void initDefault() {
 
-        setOutputText("Click the button to send an HTTP GET request ...");
+        //setOutputText("Click the button to send an HTTP GET request ...");
+        sendGetRequest();
 
     }
 
@@ -107,7 +111,8 @@ public class ExampleWebServiceModel extends AbstractModel {
 
     // Start POST Request (called from Controller)
 
-    public void sendPostRequest() {
+    public void sendPostRequest(String jsonString) {
+        json = jsonString;
         httpPostRequestThread.run();
     }
 
@@ -117,8 +122,12 @@ public class ExampleWebServiceModel extends AbstractModel {
 
         this.getJsonData().postValue(json);
 
-        setOutputText(json.toString());
-
+        try {
+            String output = json.get("messages").toString();
+            setOutputText(output);
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public MutableLiveData<JSONObject> getJsonData() {
@@ -190,7 +199,7 @@ public class ExampleWebServiceModel extends AbstractModel {
                     // Write parameters to request body
 
                     OutputStream out = conn.getOutputStream();
-                    out.write(p.getBytes());
+                    out.write(json.getBytes());
                     out.flush();
                     out.close();
 

@@ -1,10 +1,14 @@
 package edu.jsu.mcis.cs408.simplechat;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.beans.PropertyChangeEvent;
 
@@ -14,6 +18,7 @@ import edu.jsu.mcis.cs408.simplechat.databinding.ActivityMainBinding;
 public class MainActivity extends AppCompatActivity implements AbstractView {
 
     public static final String TAG = "MainActivity";
+    private static final String NAME = "John Smith";
 
     private ActivityMainBinding binding;
 
@@ -51,7 +56,18 @@ public class MainActivity extends AppCompatActivity implements AbstractView {
         binding.postButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                controller.sendPostRequest();
+
+                String input = binding.input.getText().toString();
+                JSONObject jsonObject = new JSONObject();
+                try {
+
+                    jsonObject.put("name", NAME);
+                    jsonObject.put("message", input);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+                controller.sendPostRequest(jsonObject.toString());
             }
         });
 
