@@ -49,7 +49,7 @@ public class MainActivity extends AppCompatActivity implements AbstractView {
         binding.clearButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                controller.sendGetRequest();
+                controller.sendDeleteRequest();
             }
         });
 

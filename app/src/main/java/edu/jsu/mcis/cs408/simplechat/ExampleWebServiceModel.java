@@ -32,7 +32,7 @@ public class ExampleWebServiceModel extends AbstractModel {
     private DefaultController controller;
 
     private final ExecutorService requestThreadExecutor;
-    private final Runnable httpGetRequestThread, httpPostRequestThread;
+    private final Runnable httpGetRequestThread, httpPostRequestThread, httpDeleteRequestThread;
     private Future<?> pending;
 
     public ExampleWebServiceModel() {
@@ -79,6 +79,26 @@ public class ExampleWebServiceModel extends AbstractModel {
 
         };
 
+        httpDeleteRequestThread = new Runnable() {
+
+            @Override
+            public void run() {
+
+                /* If a previous request is still pending, cancel it */
+
+                if (pending != null) { pending.cancel(true); }
+
+                /* Begin new request now, but don't wait for it */
+
+                try {
+                    pending = requestThreadExecutor.submit(new HTTPRequestTask("DELETE", POST_URL));
+                }
+                catch (Exception e) { Log.e(TAG, " Exception: ", e); }
+
+            }
+
+        };
+
     }
 
     public void initDefault() {
@@ -108,6 +128,8 @@ public class ExampleWebServiceModel extends AbstractModel {
     public void sendGetRequest() {
         httpGetRequestThread.run();
     }
+
+    public void sendDeleteRequest() {httpDeleteRequestThread.run();}
 
     // Start POST Request (called from Controller)
 
@@ -203,6 +225,9 @@ public class ExampleWebServiceModel extends AbstractModel {
                     out.flush();
                     out.close();
 
+                }
+                else if(method.equals("DELETE")) {
+                    conn.setRequestMethod("DELETE");
                 }
 
                 /* Send Request */
